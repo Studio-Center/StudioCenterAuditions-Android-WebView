@@ -11,6 +11,12 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
+import android.webkit.WebChromeClient;
+import android.util.Log;
+import android.net.Uri;
+import android.media.MediaPlayer;
+import android.content.Intent;
+import android.os.Message;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,10 +30,48 @@ public class MainActivity extends AppCompatActivity {
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
         // Enable Javascript
         WebSettings webSettings = mWebView.getSettings();
+        mWebView.getSettings().setAllowFileAccess(true);
+        mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onLoadResource(WebView view, String url){
+
+                if (url.endsWith(".mp3")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(url), "audio/*");
+                    startActivity(intent);
+
+
+                } else if (url.endsWith(".mp4") || url.endsWith(".3gp")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(url), "video/*");
+                    startActivity(intent);
+
+                }
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+
+            }
+        });
         webSettings.setJavaScriptEnabled(true);
 
         mWebView.loadUrl("http://studiocenterauditions.com/");
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
